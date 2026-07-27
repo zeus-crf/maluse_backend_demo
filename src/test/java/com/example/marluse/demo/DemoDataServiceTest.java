@@ -47,6 +47,12 @@ class DemoDataServiceTest {
         assertTrue(pedidoRepository.count() > 0, "pedidos");
         assertTrue(locacaoRepository.count() > 0, "locacoes");
         assertTrue(lancamentoRepository.count() > 0, "lancamentos");
+
+        // preco_diaria é NOT NULL no schema MySQL real (V5). O H2 dos testes deriva o schema
+        // da entidade (nullable), então esta asserção protege contra o seed gravar null e só
+        // quebrar em produção.
+        assertTrue(produtoRepository.findAll().stream().allMatch(p -> p.getPrecoDiaria() != null),
+                "todo produto deve ter preco_diaria != null (coluna NOT NULL no MySQL)");
     }
 
     @Test

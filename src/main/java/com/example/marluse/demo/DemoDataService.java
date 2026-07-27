@@ -211,7 +211,9 @@ public class DemoDataService {
                     .descricao("Item de catálogo para demonstração.")
                     .valorCompra(preco.multiply(new BigDecimal("0.65")).setScale(2, RoundingMode.HALF_UP))
                     .preco(preco)
-                    .precoDiaria(s.diaria() == null ? null : money(s.diaria()))
+                    // preco_diaria é NOT NULL no schema MySQL (V5). Para itens que não são de
+                    // locação, produção usa o próprio preço como fallback (ver ProdutoService).
+                    .precoDiaria(s.diaria() == null ? preco : money(s.diaria()))
                     .quantidadeEstoque(new BigDecimal(5 + rng.nextInt(120)))
                     .estoqueMinimo(5)
                     .ativo(true)
