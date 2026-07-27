@@ -1,0 +1,41 @@
+spring:
+  datasource:
+    url: jdbc:mysql://mysql.railway.internal:3306/railway?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # password vem via -Dspring.datasource.password=$DB_PASSWORD (Dockerfile)
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        # Agrupa carregamentos lazy: em vez de 1 query por registro (N+1),
+        # o Hibernate busca até 25 de uma vez com WHERE id IN (...).
+        # ESTE arquivo é o único de config que vai para produção (Railway),
+        # pois application.yml está no .gitignore.
+        default_batch_fetch_size: 25
+
+security:
+  jwt:
+    # secret vem via -Dsecurity.jwt.secret=$JWT_SECRET (Dockerfile)
+    access-expiration: 900000
+    refresh-expiration: 604800000
+  cookie:
+    secure: true
+
+  # app.cors.allowed-origin vem via -Dapp.cors.allowed-origin=$CORS_ORIGIN (Dockerfile)
+  # app.admin.email/senha vêm via -Dapp.admin.email/senha=$... (Dockerfile)
+
+logging:
+  level:
+    com.marluse: WARN
+    com.zaxxer.hikari: DEBUG
+    org.flywaydb: DEBUG

@@ -1,0 +1,2 @@
+ALTER TABLE produtos
+    ADD COLUMN rascunho TINYINT(1) NOT NULL DEFAULT 0;
