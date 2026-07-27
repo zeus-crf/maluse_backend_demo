@@ -19,6 +19,8 @@ import com.example.marluse.locacoes.enums.StatusLocacao;
 import com.example.marluse.locacoes.model.ItemLocacao;
 import com.example.marluse.locacoes.model.Locacao;
 import com.example.marluse.locacoes.repository.LocacaoRepository;
+import com.example.marluse.security.model.Usuario;
+import com.example.marluse.security.repository.UsuarioRepository;
 import com.example.marluse.vendas.enums.FormaPagamento;
 import com.example.marluse.vendas.enums.StatusPedido;
 import com.example.marluse.vendas.model.ItemPedido;
@@ -28,6 +30,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +56,8 @@ public class DemoDataService {
     private final PedidoRepository pedidoRepository;
     private final LocacaoRepository locacaoRepository;
     private final LancamentoFinanceiroRepository lancamentoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // Random determinístico → o demo sempre tem a mesma "cara" após cada reset.
     private final Random rng = new Random(42);
@@ -88,6 +93,24 @@ public class DemoDataService {
 
     private void bulkDelete(String entityName) {
         em.createQuery("DELETE FROM " + entityName).executeUpdate();
+    }
+
+    // ============================================================
+    // USUÁRIO DEMO
+    // ============================================================
+
+    /** Garante o usuário público do demo. Idempotente. */
+    @Transactional
+    public void ensureDemoUser() {
+        if (usuarioRepository.findByEmail(props.getUsuarioEmail()).isEmpty()) {
+            usuarioRepository.save(Usuario.builder()
+                    .nome(props.getUsuarioNome())
+                    .email(props.getUsuarioEmail())
+                    .senha(passwordEncoder.encode(props.getUsuarioSenha()))
+                    .ativo(true)
+                    .build());
+            log.info("[Demo] Usuário demo criado: {}", props.getUsuarioEmail());
+        }
     }
 
     // ============================================================
