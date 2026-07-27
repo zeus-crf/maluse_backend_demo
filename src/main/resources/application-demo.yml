@@ -1,0 +1,22 @@
+# Profile 'demo' — ativado junto com 'docker' (SPRING_PROFILES_ACTIVE=docker,demo).
+# Herda datasource/flyway/jpa do application-docker.yml. Só define o comportamento de demonstração.
+app:
+  demo:
+    enabled: true
+    # Reset periódico do banco (limpa + re-semeia). 21600000 ms = 6h.
+    reset-interval-ms: 21600000
+    # Usuário público mostrado na tela de login.
+    usuario-email: demo@marluse.com
+    usuario-senha: demo123
+    usuario-nome: Visitante Demo
+    # Volumes de dados gerados.
+    clientes: 18
+    fornecedores: 6
+    produtos: 28
+    pedidos: 45
+    locacoes: 22
+    lancamentos: 30
+
+logging:
+  level:
+    com.example.marluse.demo: INFO
