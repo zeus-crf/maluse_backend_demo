@@ -15,4 +15,10 @@ spring:
 security:
   jwt:
     secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-    expiration: 86400000
+    access-expiration: 900000
+    refresh-expiration: 604800000
+
+app:
+  admin:
+    email: admin@test.com
+    senha: admin123
