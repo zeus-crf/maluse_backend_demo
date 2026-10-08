@@ -408,8 +408,10 @@ public class DemoDataService {
         return s.toLowerCase().replaceAll("[^a-z0-9]+", ".");
     }
 
+    // DDD 00 não existe: o número fica com cara de celular, mas o botão de cobrança
+    // (wa.me) nunca abre conversa com uma pessoa real.
     private String gerarTelefone() {
-        return "(11) 9" + (1000 + rng.nextInt(9000)) + "-" + (1000 + rng.nextInt(9000));
+        return "(00) 9" + (1000 + rng.nextInt(9000)) + "-" + (1000 + rng.nextInt(9000));
     }
 
     private String gerarCpfCnpj(int i) {

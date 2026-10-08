@@ -14,11 +14,12 @@ spring:
     enabled: false
 security:
   jwt:
-    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    # Chave usada SÓ nos testes. Nunca reutilizar em produção.
+    secret: chave-somente-para-testes-nao-usar-em-producao-0123456789
     access-expiration: 900000
     refresh-expiration: 604800000
 
 app:
   admin:
     email: admin@test.com
-    senha: admin123
+    senha: senha-de-teste-forte

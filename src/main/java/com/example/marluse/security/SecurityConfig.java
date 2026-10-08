@@ -36,15 +36,23 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origin:http://localhost:4200}")
     private String allowedOrigin;
 
+    // No demo público o visitante não pode criar usuários (eles não são apagados no reset).
+    @Value("${app.demo.enabled:false}")
+    private boolean demoEnabled;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/actuator/health").permitAll()
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> {
+                        auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+                        auth.requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/actuator/health").permitAll();
+                        if (demoEnabled) {
+                            auth.requestMatchers("/api/auth/register").denyAll();
+                        }
+                        auth.anyRequest().authenticated();
+                })
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Não autenticado")))

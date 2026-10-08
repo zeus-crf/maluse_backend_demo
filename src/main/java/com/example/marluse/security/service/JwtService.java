@@ -5,6 +5,7 @@ import com.example.marluse.security.model.Usuario;
 import com.example.marluse.security.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -32,6 +36,38 @@ public class JwtService {
 
     @Value("${security.jwt.refresh-expiration}")
     private long refreshExpiration;
+
+    // HS256 exige no mínimo 256 bits (32 bytes) de chave
+    private static final int TAMANHO_MINIMO_SECRET = 32;
+
+    // SHA-256 da chave de exemplo que circula em tutoriais e já foi commitada neste repo.
+    // Comparamos pelo hash para não recolocar a chave no código.
+    private static final String HASH_SECRET_VAZADO =
+            "3354cfcf65c7b2e6840ea6f880aede239750cb1d063950c4e8fd9fbf9ec73a32";
+
+    @PostConstruct
+    void validarSecret() {
+        if (secretKey == null || secretKey.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET não definido. Configure a variável de ambiente.");
+        }
+        if (secretKey.getBytes(StandardCharsets.UTF_8).length < TAMANHO_MINIMO_SECRET) {
+            throw new IllegalStateException(
+                    "JWT_SECRET muito curto: use pelo menos " + TAMANHO_MINIMO_SECRET + " bytes (ex: openssl rand -base64 64).");
+        }
+        if (HASH_SECRET_VAZADO.equals(sha256(secretKey))) {
+            throw new IllegalStateException(
+                    "JWT_SECRET é a chave pública de exemplo que vazou no histórico do repo. Gere uma nova.");
+        }
+    }
+
+    private static String sha256(String valor) {
+        try {
+            byte[] hash = MessageDigest.getInstance("SHA-256").digest(valor.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     public String generateAccessToken(UserDetails userDetails) {
         return Jwts.builder()
